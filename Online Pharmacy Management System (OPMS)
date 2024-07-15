@@ -1,0 +1,400 @@
+def login(user):
+    with open('AccountData.txt', 'r') as f:
+        accountData = f.readlines()
+        for i in range(len(accountData)):
+            accountData[i] = accountData[i].strip()
+            accountData[i] = accountData[i].split('\t')
+
+    exist = False
+    while exist == False:
+        print('\nLogin Page')
+        username = input('Username: ')
+        password = input('Password: ')
+        
+        for acc in accountData:
+            if username == acc[0] and password == acc[1] and user == acc[2]:
+                exist = True
+                break
+        
+        if exist == False:
+            print('The username or password is incorrect. Please try again.')
+            input('Press ENTER to continue.')
+    
+    return username
+
+def registeredCustomerMenu(medicalData, username):  
+    option = '1'
+    while option != '5':
+        print('\nCustomer Menu')
+        
+        print('\nPlease select an option:')
+        print('1. View all Medicines detail')
+        print('2. Place order of medicines and do payment')
+        print('3. View own order')
+        print('4. View personal information')
+        print('5. Exit')
+
+        option = input('Option: ')
+        
+        if option == '1':
+            viewMedicalData(medicalData)
+        elif option == '2':
+            placeOrder(medicalData, username)
+        elif option == '3':
+            viewOwnOrder(medicalData, username)
+        elif option == '4':
+            viewPersonalInformation(username)
+        elif option == '5':
+            pass
+        else:
+            print('\nERROR! Please enter an integer between 1 to 5.')
+            input('Press ENTER to continue.')
+
+def placeOrder(medicalData, username):
+    print('\nPlace order of medicines')
+    
+    for i in range(len(medicalData)):
+        print(f'No: {i+1}')
+        print(f'Medicine Name: {medicalData[i][0]}')
+        print(f'Expiration Date: {medicalData[i][1]}')
+        print(f'Price: {medicalData[i][2]}')
+        print(f'Specification: {medicalData[i][3]}\n')
+        
+    idx = int(input('Enter the number that you want to place order: '))
+    quantity = int(input('Quantity: '))
+    
+    total = int(medicalData[idx-1][2])*quantity
+    
+    print(f'\nTotal: RM{total}')
+    
+    print('\nPayment')
+    input('Credit card number: ')
+    input('Security number: ')
+    
+    with open('AccountData.txt', 'r') as f:
+        accountData = f.readlines()
+        for i in range(len(accountData)):
+            accountData[i] = accountData[i].strip()
+            accountData[i] = accountData[i].split('\t')
+            
+            if accountData[i][0] == username:
+                accountData[i].append(f'{idx},{quantity},')
+                break
+            
+    with open('AccountData.txt', 'w') as f:
+        for i in range(len(accountData)):
+            f.write('\t'.join(accountData[i]) + '\n')
+    
+    print('\nPayment success!')
+    input('Press ENTER to continue.')
+
+def viewOwnOrder(medicalData, username):
+    print('\nView own order')
+    
+    with open('AccountData.txt', 'r') as f:
+        accountData = f.readlines()
+        for i in range(len(accountData)):
+            accountData[i] = accountData[i].strip()
+            accountData[i] = accountData[i].split('\t')
+            
+            if accountData[i][0] == username:
+                order = accountData[i][-1].split(',')[:-1]
+
+                if len(order) > 0:
+                    for j in range(0, len(order), 2):
+                        print(f'Medicine name: {medicalData[int(order[0])][0]}')
+                        print(f'Quantity: {order[1]}')
+                else:
+                    print('No order available.\n')
+    
+    input('Press ENTER to continue.')
+    
+def viewPersonalInformation(username):
+    print('\nView personal information')
+    
+    with open('AccountData.txt', 'r') as f:
+        accountData = f.readlines()
+        for i in range(len(accountData)):
+            accountData[i] = accountData[i].strip()
+            accountData[i] = accountData[i].split('\t')
+            
+            if accountData[i][0] == username:
+                print('Name:', accountData[i][3])
+                print('Address:', accountData[i][4])
+                print('Email ID:', accountData[i][5])
+                print('Contact Number:', accountData[i][6])
+                print('Gender:', accountData[i][7])
+                print('Date Of Birth:', accountData[i][8])
+                print('User ID:', accountData[i][0])
+    
+    input('Press ENTER to continue.')
+    
+def newCustomerMenu(medicalData):
+    option = '1'
+    while option != '3':
+        print('\nCustomer Menu')
+        
+        print('\nPlease select an option:')
+        print('1. View Medicines detail')
+        print('2. Register account')
+        print('3. Exit')
+
+        option = input('Option: ')
+        
+        if option == '1':
+            viewMedicalData(medicalData)
+        elif option == '2':
+            registerAccount()
+        elif option == '3':
+            pass
+        else:
+            print('\nERROR! Please enter an integer between 1 to 3.')
+            input('Press ENTER to continue.')
+
+def registerAccount():
+    with open('AccountData.txt', 'r') as f:
+        accountData = f.readlines()
+        for i in range(len(accountData)):
+            accountData[i] = accountData[i].strip()
+            accountData[i] = accountData[i].split('\t')
+            
+    print('\nRegister account')
+    
+    name = input('Name: ')
+    address = input('Address: ')
+    emailId = input('Email ID: ')
+    contactNumber = input('Contact Number: ')
+    gender = input('Gender: ')
+    dateOfBirth = input('Date Of Birth: ')
+    userId = input('User ID: ')
+    
+    same = False
+    while same == False:
+        password = input('Password: ')
+        rewritePassword = input('Rewrite Password: ')
+        
+        if password == rewritePassword:
+            same = True
+        else:
+            print('\nERROR! The password is not same. Please try again.')
+            same = False
+            
+    with open('AccountData.txt', 'a') as f:
+        f.write(f'{userId}\t{password}\tcustomer\t{name}\t{address}\t{emailId}\t{contactNumber}\t{gender}\t{dateOfBirth}\t\n')
+
+    print('Register successful.')
+    input('Press ENTER to continue.')
+    
+def adminMenu(medicalData):
+    option = '1'
+    while option != '8':
+        print('\nAdmin Menu')
+        
+        print('\nPlease select an option:')
+        print('1. Upload Medical detail')
+        print('2. View uploaded Medicines')
+        print('3. Modify Medicine information')
+        print('4. Delete Medicine information')
+        print('5. Search specific Medicine detail')
+        print('6. View all orders of customers')
+        print('7. Search order of specific customer')
+        print('8. Exit')
+        option = input('Option: ')
+        
+        if option == '1':
+            medicalData = upload(medicalData)
+        elif option == '2':
+            viewMedicalData(medicalData)
+        elif option == '3':
+            medicalData = modify(medicalData)
+        elif option == '4':
+            medicalData = delete(medicalData)
+        elif option == '5':
+            searchMedicine(medicalData)
+        elif option == '6':
+            viewCustomerOrder(medicalData)
+        elif option == '7':
+            searchOrder(medicalData)
+        elif option == '8':
+            pass    
+        else:
+            print('\nERROR! Please enter an integer between 1 to 8.')
+            input('Press ENTER to continue.')
+
+def upload(medicalData):
+    print('\nUpload Medical detail')
+    
+    medicineName = input('Medicine Name: ')
+    expDate = input('Expiration Date: ')
+    price = input('Price: RM')
+    specification = input('Specification: ')
+    
+    medicalData.append([medicineName, expDate, price, specification])
+    
+    with open('MedicalData.txt', 'a') as f:
+        f.write(f'{medicineName}\t{expDate}\t{price}\t{specification}\n')
+    
+    print('\nMedical detail uploaded successfully.')
+    input('Press ENTER to continue.')
+    
+    return medicalData
+
+def viewMedicalData(medicalData):
+    print('\nView uploaded Medicines')
+    
+    for i in range(len(medicalData)):
+        print(f'No: {i+1}')
+        print(f'Medicine Name: {medicalData[i][0]}')
+        print(f'Expiration Date: {medicalData[i][1]}')
+        print(f'Price: {medicalData[i][2]}')
+        print(f'Specification: {medicalData[i][3]}\n')
+    
+    input('Press ENTER to continue.')
+    
+def modify(medicalData):
+    print('\nModify Medicine information')
+    
+    for i in range(len(medicalData)):
+        print(f'No: {i+1}')
+        print(f'Medicine Name: {medicalData[i][0]}')
+        print(f'Expiration Date: {medicalData[i][1]}')
+        print(f'Price: {medicalData[i][2]}')
+        print(f'Specification: {medicalData[i][3]}\n')
+    
+    idx = input('Enter the number that you want to modify: ')
+    medicineName = input('Medicine Name: ')
+    expDate = input('Expiration Date: ')
+    price = input('Price: RM')
+    specification = input('Specification: ')
+    
+    medicalData[int(idx)-1] = [medicineName, expDate, price, specification]
+    
+    with open('MedicalData.txt', 'w') as f:
+        for i in range(len(medicalData)):
+            f.write(f'{medicalData[i][0]}\t{medicalData[i][1]}\t{medicalData[i][2]}\t{medicalData[i][3]}\n')
+        
+    print('\nMedicine information modified successfully.')
+    input('Press ENTER to continue.')
+    
+    return medicalData
+
+def delete(medicalData):
+    print('\nDelete Medicine information')
+    
+    for i in range(len(medicalData)):
+        print(f'No: {i+1}')
+        print(f'Medicine Name: {medicalData[i][0]}')
+        print(f'Expiration Date: {medicalData[i][1]}')
+        print(f'Price: {medicalData[i][2]}')
+        print(f'Specification: {medicalData[i][3]}\n')
+        
+    idx = int(input('Enter the number that you want to delete: '))
+
+    medicalData.pop(idx-1)
+    
+    with open('MedicalData.txt', 'w') as f:
+        for i in range(len(medicalData)):
+            f.write(f'{medicalData[i][0]}\t{medicalData[i][1]}\t{medicalData[i][2]}\t{medicalData[i][3]}\n')
+        
+    print('\nMedicine information deleted successfully.')
+    input('Press ENTER to continue.')
+    
+    return medicalData
+
+def searchMedicine(medicalData):
+    print('\nSearch specific Medicine detail')
+    
+    name = input('Medicine name: ')
+    
+    count = 1
+    for i in range(len(medicalData)):
+        if name in medicalData[i][0]:
+            print(f'No: {count}')
+            print(f'Medicine Name: {medicalData[i][0]}')
+            print(f'Expiration Date: {medicalData[i][1]}')
+            print(f'Price: {medicalData[i][2]}')
+            print(f'Specification: {medicalData[i][3]}\n')
+            
+            count += 1
+        
+    input('Press ENTER to continue.')
+    
+def viewCustomerOrder(medicalData):
+    print('View all orders of customers')
+    
+    with open('AccountData.txt', 'r') as f:
+        accountData = f.readlines()
+        for i in range(len(accountData)):
+            accountData[i] = accountData[i].strip()
+            accountData[i] = accountData[i].split('\t')
+            
+            if accountData[i][2] == 'customer':
+                order = accountData[i][-1].split(',')[:-2]
+                if len(order) != 0:
+                    print(f'Name: {accountData[i][3]}')
+                    for j in range(0, len(order), 2):
+                        print(f'Medicine name: {medicalData[int(order[j][0])]}')
+                        print(f'Quantity: {order[j][1]}\n')
+                else:
+                    print('No order available.\n')
+        
+    input('Press ENTER to continue.')
+
+def searchOrder(medicalData):
+    print('\nSearch order of specific customer')
+    
+    username = input('\nUsername: ')
+    
+    exist = False
+    with open('AccountData.txt', 'r') as f:
+        accountData = f.readlines()
+        for i in range(len(accountData)):
+            accountData[i] = accountData[i].strip()
+            accountData[i] = accountData[i].split('\t')
+            
+            if accountData[i][0] == username:
+                exist = True
+                order = accountData[i][-1].split(',')[:-1]
+
+                if len(order) > 0:
+                    for j in range(0, len(order), 2):
+                        print(f'Medicine name: {medicalData[int(order[0])][0]}')
+                        print(f'Quantity: {order[1]}')
+                else:
+                    print('No order available.\n')
+    
+    if exist == False:
+        print('ERROR! No such username found.\n')
+        
+    input('Press ENTER to continue.')         
+    
+with open('MedicalData.txt', 'r') as f:
+    medicalData = f.readlines()
+    for i in range(len(medicalData)):
+        medicalData[i] = medicalData[i].strip()
+        medicalData[i] = medicalData[i].split('\t')
+            
+option = '1'
+while option != '4':
+    print('\nOnline Pharmacy Management System (OPMS)')
+    
+    print('\nPlease select an option:')
+    print('1. Registered Customer')
+    print('2. New Customer')
+    print('3. Admin')
+    print('4. Exit')
+    option = input('Option: ')
+    
+    if option == '1':
+        username = login('customer')
+        registeredCustomerMenu(medicalData, username)
+    elif option == '2':
+        newCustomerMenu(medicalData)
+    elif option == '3':
+        login('admin')
+        adminMenu(medicalData)
+    elif option == '4':
+        pass
+    else:
+        print('\nERROR! Please enter an integer between 1 to 4.')
+        input('Press ENTER to continue.')
